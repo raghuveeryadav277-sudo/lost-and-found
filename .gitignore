@@ -1,0 +1,15 @@
+# Build output
+target/
+*.jar
+*.class
+
+# Local database files (H2) and logs
+*.mv.db
+*.trace.db
+*.log
+
+# IDE / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
