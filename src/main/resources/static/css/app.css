@@ -1,0 +1,56 @@
+/* Lost & Found - Smart Campus Asset Recovery Platform */
+:root {
+  --brand: #14406b;
+  --brand-dark: #0d2c4c;
+  --accent: #f2a33c;
+}
+
+body {
+  background: #f4f6f9;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.navbar-brand { font-weight: 700; letter-spacing: .3px; }
+.bg-brand { background: linear-gradient(90deg, var(--brand-dark), var(--brand)); }
+.btn-brand { background: var(--brand); color: #fff; }
+.btn-brand:hover { background: var(--brand-dark); color: #fff; }
+.btn-accent { background: var(--accent); color: #212529; font-weight: 600; }
+.btn-accent:hover { background: #dd9026; color: #212529; }
+
+.hero {
+  background: linear-gradient(120deg, var(--brand-dark), var(--brand) 60%, #1f639e);
+  color: #fff;
+  border-radius: 0 0 24px 24px;
+}
+.hero .lead { color: #d7e6f5; }
+
+.flow-step {
+  background: #fff; border-radius: 14px; padding: 18px 10px;
+  box-shadow: 0 2px 10px rgba(13,44,76,.08); text-align: center; height: 100%;
+}
+.flow-step .num {
+  width: 42px; height: 42px; margin: 0 auto 8px; border-radius: 50%;
+  background: var(--brand); color: #fff; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.item-card { transition: transform .12s ease, box-shadow .12s ease; height: 100%; }
+.item-card:hover { transform: translateY(-3px); box-shadow: 0 8px 22px rgba(13,44,76,.15); }
+.item-card img { height: 170px; object-fit: cover; background: #dfe7ee; }
+
+.badge-lost { background: #c0392b; }
+.badge-found { background: #1e8449; }
+.badge-status-OPEN { background: #2e6da4; }
+.badge-status-CLAIMED { background: #b7950b; color: #fff; }
+.badge-status-RETURNED { background: #1e8449; }
+.badge-status-CLOSED { background: #616a6b; }
+
+.stat-card { border: none; border-radius: 14px; box-shadow: 0 2px 10px rgba(13,44,76,.08); }
+.stat-card .stat-num { font-size: 2rem; font-weight: 700; color: var(--brand); }
+
+.notif-unread { border-left: 4px solid var(--accent); background: #fffaf1; }
+.qr-img { max-width: 220px; border: 1px solid #dee2e6; border-radius: 10px; padding: 6px; background: #fff; }
+.map-pin { cursor: pointer; }
+.map-pin:hover circle { stroke: var(--accent); stroke-width: 3; }
+footer { color: #6c757d; }
+.auth-card { max-width: 440px; margin: 48px auto; }
