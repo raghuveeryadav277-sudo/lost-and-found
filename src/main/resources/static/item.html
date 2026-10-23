@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Item Details - Lost &amp; Found</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+<div id="app-navbar"></div>
+
+<div class="container mt-4">
+  <div id="msg"></div>
+  <div id="detail"><p class="text-muted">Loading...</p></div>
+
+  <h3 class="mt-5 mb-3">Possible matches</h3>
+  <p class="text-muted">Suggested by category, description keywords, location and image similarity.</p>
+  <div class="row" id="matches"><p class="text-muted">Loading...</p></div>
+</div>
+
+<div id="app-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await renderNavbar("browse");
+  pageFooter();
+  const id = new URLSearchParams(location.search).get("id");
+  const detail = document.getElementById("detail");
+  const msg = document.getElementById("msg");
+  let item;
+  try { item = await apiGet("/api/items/" + id); }
+  catch (e) { detail.innerHTML = '<div class="alert alert-danger">Item not found.</div>'; return; }
+
+  const isMine = currentUser && currentUser.userId === item.reportedById;
+  detail.innerHTML = `
+  <div class="card shadow-sm">
+    <div class="row g-0">
+      <div class="col-md-5">
+        ${item.image ? `<img src="${esc(item.image)}" class="img-fluid rounded-start w-100 h-100" style="object-fit:cover;min-height:280px" alt="">`
+                     : `<div class="bg-light d-flex align-items-center justify-content-center h-100" style="min-height:280px">No photo</div>`}
+      </div>
+      <div class="col-md-7">
+        <div class="card-body">
+          <div class="mb-2">
+            <span class="badge ${item.type === "LOST" ? "badge-lost" : "badge-found"}">${item.type}</span>
+            <span class="badge badge-status-${item.status}">${item.status}</span>
+          </div>
+          <h2 class="card-title">${esc(item.title)}</h2>
+          <p class="card-text">${esc(item.description)}</p>
+          <table class="table table-sm w-auto">
+            <tr><th>Category</th><td>${esc(item.category)}</td></tr>
+            <tr><th>Location</th><td>${esc(item.location || "-")}</td></tr>
+            <tr><th>Reported by</th><td>${esc(item.reportedByName)}</td></tr>
+            <tr><th>Reported on</th><td>${fmtDate(item.createdAt)}</td></tr>
+          </table>
+          <div id="claim-area"></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  // Claim box: only for a logged-in user, on someone else's OPEN item.
+  const claimArea = document.getElementById("claim-area");
+  if (!currentUser) {
+    claimArea.innerHTML = `<a class="btn btn-brand" href="/login.html">Login to claim this item</a>`;
+  } else if (isMine) {
+    claimArea.innerHTML = `<p class="text-muted mb-0">This is your own report. Claims on it will appear in <a href="/my-claims.html">My Claims</a>.</p>`;
+  } else if (item.status !== "OPEN") {
+    claimArea.innerHTML = `<p class="text-muted mb-0">This item is ${esc(item.status)} and cannot be claimed.</p>`;
+  } else {
+    claimArea.innerHTML = `
+      <h5 class="mt-3">Is this yours? Raise a claim</h5>
+      <div class="mb-2">
+        <textarea id="proof" class="form-control" rows="2"
+          placeholder="Proof of ownership - e.g. what is inside it, a photo of you with it, bill details"></textarea>
+      </div>
+      <button id="claim-btn" class="btn btn-accent">Claim this item</button>`;
+    document.getElementById("claim-btn").addEventListener("click", async () => {
+      try {
+        await apiPost("/api/claims", { itemId: item.itemId, proofNote: document.getElementById("proof").value });
+        msg.innerHTML = '<div class="alert alert-success">Claim raised! The reporter will review it. Track it in <a href="/my-claims.html" class="alert-link">My Claims</a>.</div>';
+        claimArea.innerHTML = "";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        msg.innerHTML = `<div class="alert alert-danger">${esc(err.message)}</div>`;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    });
+  }
+
+  // Matches
+  try {
+    const matches = await apiGet("/api/items/" + id + "/matches");
+    document.getElementById("matches").innerHTML = matches.length
+      ? matches.map(m => itemCard(m.item,
+          `<p class="mb-2"><span class="badge bg-primary">Match score: ${m.matchScore}%</span>
+           ${m.imageMatchScore !== null && m.imageMatchScore !== undefined
+             ? `<span class="badge bg-info text-dark">Image match: ${m.imageMatchScore}%</span>` : ""}</p>`)).join("")
+      : '<p class="text-muted">No strong matches yet. You will be notified when a matching item is reported.</p>';
+  } catch (e) {
+    document.getElementById("matches").innerHTML = '<p class="text-muted">Could not load matches.</p>';
+  }
+})();
+</script>
+</body>
+</html>

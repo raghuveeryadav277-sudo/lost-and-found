@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home - Lost &amp; Found | Smart Campus Asset Recovery Platform</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+<div id="app-navbar"></div>
+
+<div class="hero py-5 mb-4">
+  <div class="container text-center">
+    <h1 class="display-5 fw-bold">Lost something on campus?</h1>
+    <p class="lead">Report it. Search for it. Get it back - verified.</p>
+    <p class="mb-4">One platform that connects people with their lost items, faster and more securely.</p>
+    <a href="/report.html" class="btn btn-accent btn-lg me-2">Report an Item</a>
+    <a href="/browse.html" class="btn btn-outline-light btn-lg">Search Items</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row text-center mb-4" id="stats-row">
+    <div class="col-md-3 mb-3"><div class="card stat-card"><div class="card-body"><div class="stat-num" id="stat-total">-</div>Total reports</div></div></div>
+    <div class="col-md-3 mb-3"><div class="card stat-card"><div class="card-body"><div class="stat-num" id="stat-open">-</div>Open cases</div></div></div>
+    <div class="col-md-3 mb-3"><div class="card stat-card"><div class="card-body"><div class="stat-num" id="stat-found">-</div>Items found</div></div></div>
+    <div class="col-md-3 mb-3"><div class="card stat-card"><div class="card-body"><div class="stat-num" id="stat-returned">-</div>Returned to owners</div></div></div>
+  </div>
+
+  <h3 class="mb-3">How it works</h3>
+  <div class="row mb-5">
+    <div class="col-md-2 col-6 mb-3"><div class="flow-step"><div class="num">1</div><strong>Report</strong><br><small class="text-muted">Add lost/found item with a photo</small></div></div>
+    <div class="col-md-2 col-6 mb-3"><div class="flow-step"><div class="num">2</div><strong>Search</strong><br><small class="text-muted">Browse searchable records</small></div></div>
+    <div class="col-md-2 col-6 mb-3"><div class="flow-step"><div class="num">3</div><strong>Match</strong><br><small class="text-muted">Smart suggestions incl. image match</small></div></div>
+    <div class="col-md-2 col-6 mb-3"><div class="flow-step"><div class="num">4</div><strong>Claim</strong><br><small class="text-muted">Owner claims with proof</small></div></div>
+    <div class="col-md-2 col-6 mb-3"><div class="flow-step"><div class="num">5</div><strong>Verify</strong><br><small class="text-muted">QR check at handover</small></div></div>
+    <div class="col-md-2 col-6 mb-3"><div class="flow-step"><div class="num">6</div><strong>Return</strong><br><small class="text-muted">Item returned, case closed</small></div></div>
+  </div>
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Recent open reports</h3>
+    <a href="/browse.html" class="btn btn-outline-primary btn-sm">See all</a>
+  </div>
+  <div class="row" id="recent-items"><p class="text-muted">Loading...</p></div>
+</div>
+
+<div id="app-footer"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/app.js"></script>
+<script>
+(async () => {
+  await renderNavbar("home");
+  pageFooter();
+  try {
+    const s = await apiGet("/api/stats");
+    document.getElementById("stat-total").textContent = s.total;
+    document.getElementById("stat-open").textContent = s.open;
+    document.getElementById("stat-found").textContent = s.found;
+    document.getElementById("stat-returned").textContent = s.returned;
+  } catch (e) {}
+  try {
+    const items = await apiGet("/api/items?status=OPEN");
+    document.getElementById("recent-items").innerHTML =
+      items.slice(0, 6).map(i => itemCard(i)).join("") || '<p class="text-muted">No open reports yet.</p>';
+  } catch (e) {
+    document.getElementById("recent-items").innerHTML = '<p class="text-danger">Could not load items.</p>';
+  }
+})();
+</script>
+</body>
+</html>
